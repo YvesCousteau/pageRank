@@ -1,70 +1,123 @@
 #include <iostream>
-#include <string>
 #include <fstream>
 #include <sstream>
+
+#include <string>
 #include <complex>
+#include <vector>
+#include <math.h>
+
+#include <ctime>
+#include <chrono>
 using namespace std;
 
-int * power_iteration(int matrix[][2], int num_simulations, int size);
+// void pageRank(int iteration, int size, float* x, float matrix_proba[][1005], float dumping_factor);
 
 int main() {
-  srand((unsigned) time(0));
-
-  // Initialise Matrix
-  std::fstream file_size("/home/hugo/Project/pageRank/email-Eu-core.txt", std::ios_base::in);
-  int size = 0;
-  std::string unused;
-  while ( std::getline(file_size, unused) ) {
-      ++size;
-  }
-  int matrix[size][2];
-  string var_1, var_2;
-  int i = 0;
-  int j = 0;
-  std::fstream file_init("/home/hugo/Project/pageRank/email-Eu-core.txt", std::ios_base::in);
-  while ( std::getline(file_init, unused) ) {
-    istringstream tmp(unused);
-    for(string unused; tmp >> unused; ) {
-      matrix[i][j] = stoi(unused);
-      ++j;
+  // clock
+  int size = 1005;
+  float dumping_diff = 0.05;
+  float tol = 0.000001;
+  // set Matrix to zero
+  int matrix[size][size];
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
+      matrix[i][j] = 0;
     }
-    ++i;
-    j = 0;
-  }
-  //
-
-  // Launch Function
-  int* b_final = power_iteration(matrix, 100, size);
-  cout << b_final;
-  return 0;
-}
-
-int * power_iteration(int matrix[][2], int num_simulations, int size) {
-  // Initialise Vector
-  int b_0[size];
-  for (int i = 0; i < (sizeof(b_0)/sizeof(*b_0)); ++i) {
-    b_0[i] = (1 + (rand() % size));
   }
 
-  //
-  int* b_k = b_0;
-  int b_k_tmp[size];
-  int b_k_tmp_norm;
-  for (int z = 0; z < num_simulations; ++z) {
-    for (int i = 0; i < size; ++i) {
-      for (int j = 0; j < 2; ++j) {
-        b_k_tmp[i] = b_k_tmp[i] + (b_k[i] * matrix[i][j]);
+  // init Matrix
+  string line;
+  fstream file("/home/hugo/Project/pageRank/email-Eu-core.txt", ios_base::in);
+  if (file) {
+    while (getline(file, line)) {
+      matrix[stoi(line.substr(0, line.find(" ")))][stoi(line.erase(0, line.find(" ")+1))] = 1;
+    }
+  }
+
+  // count link
+  int count_link[size];
+  for (int i = 0; i < size; i++) {
+    count_link[i] = 0;
+    for (int j = 0; j < size; j++) {
+      if (matrix[i][j] == 1) {
+        count_link[i] ++;
       }
     }
-    double norm = 0.;
-    for (int i = 0; i < size; ++i) {
-        norm += b_k_tmp[i] * b_k_tmp[i];
-    }
-    b_k_tmp_norm = sqrt(norm);
+  }
 
-    for (int i = 0; i < size; ++i) {
-        b_k[i] = b_k_tmp[i] / b_k_tmp_norm;
+  // matrix transition
+  float matrix_proba[size][size];
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
+      if (matrix[i][j] == 1) {
+        matrix_proba[i][j] = 1.0/count_link[i];
+      } else {
+        matrix_proba[i][j] = 0.0;
+      }
+      // printf("%f\n",matrix_proba[i][j]);
+      // printf("%d\n",matrix[i][j]);
     }
   }
-  return b_k;
+
+  // init Vector
+  float b[size];
+  for (int i = 0; i < size; i++) {
+    b[i] = (1.0 / size);
+    // printf("%f\n", b[i]);
+  }
+
+  // Write
+  ofstream output_file;
+  output_file.open("clock.txt");
+  string separator = " ";
+
+  // loop dumping factor
+  float x[size];
+  float x_last[size];
+  double err;
+  for (double dumping_factor = 0; dumping_factor <= 1.00 + dumping_diff; dumping_factor += dumping_diff) {
+    // loop it
+    err = 0.0; // need to be > 0
+    for (int i = 0; i < size; i++) {
+      x[i] = b[i];
+    }
+
+    auto start = chrono::steady_clock::now();
+    for (int k = 0; k < 100; k++) {
+      // x = A * b
+      for (int m = 0; m < size; m++) {
+        // err += fabs(x_new[m] - x[m]);
+        x_last[m] = x[m];
+      }
+
+      for (int n = 0; n != size; n++) {
+        x[n] = 0;
+        for (int d = 0; d != size; d++) {
+          x[n] += (matrix_proba[n][d]*x_last[d]);
+        }
+        // printf("%f\n", x[n]);
+      }
+
+      for (int l = 0; l != size; l++) {
+        x[l] = (dumping_factor * x[l]) + ((1 - dumping_factor) / size);
+        // printf("%f\n", x[l]);
+      }
+
+      err = 0.0;
+      for (int e = 0; e != size; e++) {
+        err += fabs(x_last[e] - x[e]);
+      }
+
+      if (err < tol) {
+        printf("%f vs %f\n", err, tol);
+        break;
+      }
+    }
+
+    auto end = chrono::steady_clock::now();
+    output_file << chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << separator << dumping_factor << "\n";
+  }
+  output_file.close();
+  return 0;
 }
