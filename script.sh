@@ -3,7 +3,11 @@
 # Makefile
 make
 # Run pageRank
-./pageRank
+./pageRank 0.000001
 # Plot courbe
-gnuplot -c ./gnuplot.gp clock.txt > plot.png
-eog plot.png
+FILES="clock_*"
+for f in $(ls clock_*)
+do
+  gnuplot -c ./gnuplot.gp $f > plot_${f%.*}.png
+  eog plot_${f%.*}.png
+done
