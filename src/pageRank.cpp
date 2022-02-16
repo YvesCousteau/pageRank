@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
     // printf("%f\n", b[i]);
   }
 
-  for (int tol_it = 1; tol_it < 6; tol_it ++) {
+  for (int tol_it = 1; tol_it < 7; tol_it ++) {
     tol = 1 / pow(10, tol_it);
 
     // Write

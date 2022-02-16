@@ -1,6 +1,6 @@
 # pageRank
 
-Implémentation de l'algorithme de pageRank amelioré avec la méthode de la puissance.
+Implémentation de l'algorithme de page Rank amélioré avec la méthode de la puissance.
 
 ![Plot Exemple](./plot/plot_clock_0.000010.png)
 
@@ -10,7 +10,7 @@ Implémentation de l'algorithme de pageRank amelioré avec la méthode de la pui
 ```
 bash ./script/script.sh
 ```
-Ce script éxecute la compilation, l'éxecution de lexécutable et la création des courbes.
+Ce script exécute la compilation, l'exécution de l'exécutable et la création des courbes.
 
 ---
 ### Compilation
