@@ -27,7 +27,7 @@ int main(int argc, char const *argv[]) {
 
   // init Matrix
   string line;
-  fstream file("/home/hugo/Project/pageRank/email-Eu-core.txt", ios_base::in);
+  fstream file("./graphe/email-Eu-core.txt", ios_base::in);
   if (file) {
     while (getline(file, line)) {
       matrix[stoi(line.substr(0, line.find(" ")))][stoi(line.erase(0, line.find(" ")+1))] = 1;
@@ -71,7 +71,7 @@ int main(int argc, char const *argv[]) {
 
     // Write
     ofstream output_file;
-    output_file.open("clock_"+ to_string(tol) +".txt");
+    output_file.open("./data/clock_"+ to_string(tol) +".txt");
     string separator = " ";
 
     // loop dumping factor
